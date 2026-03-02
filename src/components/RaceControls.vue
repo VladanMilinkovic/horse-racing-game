@@ -2,7 +2,7 @@
   <header class="header">
     <h1>Horse Racing Game</h1>
     <div class="actions">
-      <button @click="$emit('generate')" :disabled="running">Generate</button>
+      <button @click="$emit('generate')">Generate</button>
       <button class="start" @click="$emit('start')" :disabled="!canStart">Start</button>
       <button class="stop" @click="$emit('stop')" :disabled="!running">Stop</button>
     </div>

@@ -1,5 +1,12 @@
 import { ROUND_DISTANCES } from '../constants/race'
 
+const CONDITION_WEIGHT = 0.65
+const LUCK_WEIGHT = 0.35
+const STAMINA_DISTANCE_DIVISOR = 180
+const BASE_SPEED = 70
+const SCORE_SPEED_DIVISOR = 2
+const RANK_TIME_OFFSET_SECONDS = 0.12
+
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
@@ -26,9 +33,11 @@ function makePalette(size) {
 }
 
 function scoreHorse(horse, distance) {
-  const conditionFactor = horse.condition * 0.65
-  const luckFactor = randomInt(1, 100) * 0.35
-  const staminaPenalty = distance / 180
+  // Condition is the stable performance baseline, luck adds per-race variance,
+  // and stamina penalty scales with distance so long races are naturally slower.
+  const conditionFactor = horse.condition * CONDITION_WEIGHT
+  const luckFactor = randomInt(1, 100) * LUCK_WEIGHT
+  const staminaPenalty = distance / STAMINA_DISTANCE_DIVISOR
   const totalScore = conditionFactor + luckFactor - staminaPenalty
   return Math.max(1, totalScore)
 }
@@ -67,8 +76,8 @@ export function buildRoundRanking(participants, distance) {
   const sorted = [...scores].sort((a, b) => b.score - a.score)
 
   return sorted.map((item, index) => {
-    const baseSeconds = distance / (70 + item.score / 2)
-    const slightOffset = index * 0.12
+    const baseSeconds = distance / (BASE_SPEED + item.score / SCORE_SPEED_DIVISOR)
+    const slightOffset = index * RANK_TIME_OFFSET_SECONDS
     return {
       horseId: item.horse.id,
       horseName: item.horse.name,
